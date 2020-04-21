@@ -3,20 +3,20 @@
 type TasaMortalidad = Float
 type MedidaCombate = String
 type Continente = String
-type CantidadPoblacion = Int
+type CantidadPoblacion = Int  
 type Victimas = Int
 type Mortalidad = Float
 
 data Enfermedad = Enfermedad {
     tasaDeMortalidad::TasaMortalidad,
     medidaDeCombate::MedidaCombate
-} deriving Show;
+} deriving Show
 
 data Planeta = Planeta {
     poblacionTotal::CantidadPoblacion,
     continentes::[Continente],
     medidasTomadas::[MedidaCombate]
-} deriving Show;
+} deriving Show
 
 -- Ejemplo de Enfermedades
 
@@ -27,7 +27,7 @@ dengue :: Enfermedad
 dengue = Enfermedad 2.7 "Evitar la acumulacion de agua"
 
 peste :: Enfermedad
-peste = Enfermedad 0.01 "lavarse las manos"
+peste = Enfermedad 1 "lavarse las manos"
 
 -- Ejemplos de Planetas
 
@@ -43,36 +43,28 @@ venus = Planeta 15 ["Comuna 1","Comuna 2","Comuna 3","Comuna 4","Comuna 5"] ["cu
 -- Punto 1: 
 
 combinarEnfermedades:: Enfermedad -> Enfermedad -> Enfermedad
-combinarEnfermedades enfermedad1 enfermedad2 = Enfermedad (obtenerMortalidadConjunta enfermedad1 enfermedad2) (medidaDeCombate enfermedad1)
-
-obtenerMortalidadConjunta::Enfermedad -> Enfermedad -> TasaMortalidad
-obtenerMortalidadConjunta enfermedad1 enfermedad2 = tasaDeMortalidad enfermedad1 + tasaDeMortalidad enfermedad2
+combinarEnfermedades enfermedad1 enfermedad2 = Enfermedad (tasaDeMortalidad enfermedad1 + tasaDeMortalidad enfermedad2) (medidaDeCombate enfermedad1)
 
 -- Punto 2
 
 tomarMedidasDeProteccion :: Planeta -> Enfermedad -> Planeta
-tomarMedidasDeProteccion planeta enfermedad | not (planetaProtegidoContra planeta enfermedad) = implementarMedida planeta (medidaDeCombate enfermedad)
-                                            | otherwise = planeta
+tomarMedidasDeProteccion planeta enfermedad 
+    | planetaProtegidoContra planeta enfermedad = planeta 
+    | otherwise = implementarMedida planeta (medidaDeCombate enfermedad)
 
 planetaProtegidoContra :: Planeta -> Enfermedad -> Bool                                            
-planetaProtegidoContra planeta enfermedad = planetaImplementaMedida planeta (medidaDeCombate enfermedad)
-
-planetaImplementaMedida:: Planeta -> MedidaCombate -> Bool
-planetaImplementaMedida planeta medida = elem medida (medidasTomadas planeta)
+planetaProtegidoContra planeta enfermedad = elem  (medidaDeCombate enfermedad) (medidasTomadas planeta)
 
 implementarMedida :: Planeta -> MedidaCombate -> Planeta
-implementarMedida planeta medida = planeta{medidasTomadas = (medidasTomadas planeta) ++ [medida] }
+implementarMedida planeta medida = planeta{medidasTomadas = medida:medidasTomadas planeta }
 
 -- Punto 3
 
 estaAlHorno :: Planeta -> Enfermedad -> Bool
-estaAlHorno planeta enfermedad = not (planetaProtegidoContra planeta enfermedad) && (cantidadDeVictimas planeta enfermedad) > 1000000
+estaAlHorno planeta enfermedad = not (planetaProtegidoContra planeta enfermedad) && cantidadDeVictimas planeta enfermedad > 1000000
 
 cantidadDeVictimas :: Planeta -> Enfermedad -> Victimas
-cantidadDeVictimas planeta enfermedad = ceiling ( mortalidad (tasaDeMortalidad enfermedad) (poblacionTotal planeta) ) 
-
-mortalidad :: TasaMortalidad -> CantidadPoblacion -> Mortalidad
-mortalidad tasa cantidadPersonas = ( tasa * fromIntegral (cantidadPersonas) ) / 100
+cantidadDeVictimas planeta enfermedad =   ceiling( tasaDeMortalidad enfermedad) * poblacionTotal planeta `div` 100
 
 -- Punto 4
 tieneMasMedidasQueHabitantesPorContinente :: Planeta -> Bool
@@ -82,22 +74,15 @@ cantidadMedidasPrevencion :: Planeta -> Int
 cantidadMedidasPrevencion planeta = length (medidasTomadas planeta)
 
 cantidadHabitantesPorContinente :: Planeta -> Int
-cantidadHabitantesPorContinente planeta | tieneContinentes planeta = div (poblacionTotal planeta) (cantidadDeContinentes planeta)
-                                        | otherwise = poblacionTotal planeta
-
-tieneContinentes :: Planeta -> Bool
-tieneContinentes planeta = cantidadDeContinentes planeta > 0
-
-cantidadDeContinentes :: Planeta -> Int
-cantidadDeContinentes planeta = length (continentes planeta)
+cantidadHabitantesPorContinente (Planeta poblacion [] _ ) = poblacion 
+cantidadHabitantesPorContinente (Planeta poblacion continentes _ ) = poblacion `div` (length continentes)
 
 -- Punto 5
 
-type PlanetaAtacado = (Planeta,Victimas)
-
-enfermedadAtacaPlaneta :: Enfermedad -> Planeta -> PlanetaAtacado
-enfermedadAtacaPlaneta enfermedad planeta | planetaProtegidoContra planeta enfermedad = (planeta,0)
-                                          | otherwise = ( planetaDespuesDelAtaque planeta enfermedad , cantidadDeVictimas planeta enfermedad )
+enfermedadAtacaPlaneta :: Enfermedad -> Planeta -> (Planeta,Victimas)
+enfermedadAtacaPlaneta enfermedad planeta 
+    | planetaProtegidoContra planeta enfermedad = (planeta,0)
+    | otherwise = ( planetaDespuesDelAtaque planeta enfermedad , cantidadDeVictimas planeta enfermedad )
 
 planetaDespuesDelAtaque :: Planeta -> Enfermedad -> Planeta
 planetaDespuesDelAtaque planeta enfermedad = tomarMedidasDeProteccion ( atacarPlaneta planeta enfermedad ) enfermedad
