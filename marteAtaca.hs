@@ -57,10 +57,9 @@ planetaProtegidoContra planeta enfermedad = elem  (medidaDeCombate enfermedad) (
 
 implementarMedida :: Planeta -> MedidaCombate -> Planeta
 implementarMedida planeta medida = planeta{medidasTomadas = medida:medidasTomadas planeta }
-implementarMedida planeta medida = planeta{medidasTomadas = medidasTomadas planeta ++ [medida]}
-
-implementarMedida (Planeta p c medidas) medida = Planeta p c (medida:medidas)
-implementarMedida (Planeta p c medidas) medida = Planeta p c (medidas++[medida])
+--implementarMedida planeta medida = planeta{medidasTomadas = medidasTomadas planeta ++ [medida]}
+--implementarMedida (Planeta p c medidas) medida = Planeta p c (medida:medidas)
+--implementarMedida (Planeta p c medidas) medida = Planeta p c (medidas++[medida])
 
 
 -- Punto 3
@@ -70,7 +69,7 @@ estaAlHorno planeta enfermedad = not (planetaProtegidoContra planeta enfermedad)
 
 cantidadDeVictimas :: Planeta -> Enfermedad -> Victimas
 cantidadDeVictimas planeta enfermedad =   ceiling (tasaDeMortalidad enfermedad) * poblacionTotal planeta `div` 100
-cantidadDeVictimas planeta enfermedad =   ceiling (tasaDeMortalidad enfermedad * fromIntegral (poblacionTotal planeta) / 100)
+--cantidadDeVictimas planeta enfermedad =   ceiling (tasaDeMortalidad enfermedad * fromIntegral (poblacionTotal planeta) / 100)
 
 -- Punto 4
 tieneMasMedidasQueHabitantesPorContinente :: Planeta -> Bool
@@ -81,7 +80,7 @@ cantidadMedidasPrevencion planeta = length (medidasTomadas planeta)
 
 cantidadHabitantesPorContinente :: Planeta -> Int
 cantidadHabitantesPorContinente (Planeta poblacion [] _ ) = poblacion 
-cantidadHabitantesPorContinente (Planeta poblacion continentes _ ) = poblacion `div` (length continentes)
+cantidadHabitantesPorContinente (Planeta poblacion conts _ ) = poblacion `div` (length conts)
 
 -- Punto 5
 enfermedadAtacaPlaneta :: Enfermedad -> Planeta -> (Planeta,Victimas)
