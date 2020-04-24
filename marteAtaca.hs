@@ -7,7 +7,7 @@ type CantidadPoblacion = Int
 type Victimas = Int
 type Mortalidad = Float
 
-data Enfermedad = Enfermedad {
+data Enfermedad = UnaEnfermedad {
     tasaDeMortalidad::TasaMortalidad,
     medidaDeCombate::MedidaCombate
 } deriving Show
@@ -21,13 +21,13 @@ data Planeta = Planeta {
 -- Ejemplo de Enfermedades
 
 coronaVirus :: Enfermedad
-coronaVirus = Enfermedad 3.5 "cuarentena"
+coronaVirus = UnaEnfermedad 3.5 "cuarentena"
 
 dengue :: Enfermedad
-dengue = Enfermedad 2.7 "Evitar la acumulacion de agua"
+dengue = UnaEnfermedad 2.7 "Evitar la acumulacion de agua"
 
 peste :: Enfermedad
-peste = Enfermedad 1 "lavarse las manos"
+peste = UnaEnfermedad 1 "lavarse las manos"
 
 -- Ejemplos de Planetas
 
@@ -43,7 +43,7 @@ venus = Planeta 15 ["Comuna 1","Comuna 2","Comuna 3","Comuna 4","Comuna 5"] ["cu
 -- Punto 1: 
 
 combinarEnfermedades:: Enfermedad -> Enfermedad -> Enfermedad
-combinarEnfermedades enfermedad1 enfermedad2 = Enfermedad (tasaDeMortalidad enfermedad1 + tasaDeMortalidad enfermedad2) (medidaDeCombate enfermedad1)
+combinarEnfermedades enfermedad1 enfermedad2 = UnaEnfermedad (tasaDeMortalidad enfermedad1 + tasaDeMortalidad enfermedad2) (medidaDeCombate enfermedad1)
 
 -- Punto 2
 
@@ -57,6 +57,11 @@ planetaProtegidoContra planeta enfermedad = elem  (medidaDeCombate enfermedad) (
 
 implementarMedida :: Planeta -> MedidaCombate -> Planeta
 implementarMedida planeta medida = planeta{medidasTomadas = medida:medidasTomadas planeta }
+implementarMedida planeta medida = planeta{medidasTomadas = medidasTomadas planeta ++ [medida]}
+
+implementarMedida (Planeta p c medidas) medida = Planeta p c (medida:medidas)
+implementarMedida (Planeta p c medidas) medida = Planeta p c (medidas++[medida])
+
 
 -- Punto 3
 
@@ -64,7 +69,8 @@ estaAlHorno :: Planeta -> Enfermedad -> Bool
 estaAlHorno planeta enfermedad = not (planetaProtegidoContra planeta enfermedad) && cantidadDeVictimas planeta enfermedad > 1000000
 
 cantidadDeVictimas :: Planeta -> Enfermedad -> Victimas
-cantidadDeVictimas planeta enfermedad =   ceiling( tasaDeMortalidad enfermedad) * poblacionTotal planeta `div` 100
+cantidadDeVictimas planeta enfermedad =   ceiling (tasaDeMortalidad enfermedad) * poblacionTotal planeta `div` 100
+cantidadDeVictimas planeta enfermedad =   ceiling (tasaDeMortalidad enfermedad * fromIntegral (poblacionTotal planeta) / 100)
 
 -- Punto 4
 tieneMasMedidasQueHabitantesPorContinente :: Planeta -> Bool
@@ -78,10 +84,9 @@ cantidadHabitantesPorContinente (Planeta poblacion [] _ ) = poblacion
 cantidadHabitantesPorContinente (Planeta poblacion continentes _ ) = poblacion `div` (length continentes)
 
 -- Punto 5
-
 enfermedadAtacaPlaneta :: Enfermedad -> Planeta -> (Planeta,Victimas)
 enfermedadAtacaPlaneta enfermedad planeta 
-    | planetaProtegidoContra planeta enfermedad = (planeta,0)
+    | planetaProtegidoContra planeta enfermedad =  (planeta, 0)
     | otherwise = ( planetaDespuesDelAtaque planeta enfermedad , cantidadDeVictimas planeta enfermedad )
 
 planetaDespuesDelAtaque :: Planeta -> Enfermedad -> Planeta
